@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Override default "today" (blue) highlight from react-calendar */
+.react-calendar__tile--now {
+  background: white !important; 
+  color: black !important;    
+  border-radius: 9999px !important; 
+  border: 1px solid #16a34a !important;
+}
