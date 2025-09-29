@@ -1,15 +1,91 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import { supabase } from "../../lib/supabase";
+
+// Type
+type EventDetails = {
+  id: string;
+  title: string;
+  events: {
+    event_date: string;
+    event_time: string;
+    location: string;
+  } | null;
+};
 
 export default function Events() {
-  // Example event data
-  const eventDate = new Date(2025, 8, 22); // September = 8 (0-based)
-  const event = {
-    title: "Seminar on AI in Education",
-    date: "September 22, 2025",
-    time: "2:00 – 5:00 PM",
-    venue: "Sentrum",
-  };
+  const [events, setEvents] = useState<EventDetails[]>([]);
+  const [highlightDates, setHighlightDates] = useState<Date[]>([]);
+
+  useEffect(() => {
+    async function fetchEvents() {
+      const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
+      const { data, error } = await supabase
+        .from("posts")
+        .select(
+          `
+          id,
+          title,
+          events (
+            event_date,
+            event_time,
+            location
+          )
+        `
+        )
+        .eq("type", "event")
+        .gte("events.event_date", today)
+        .order("event_date", { foreignTable: "events", ascending: true });
+
+      if (error) {
+        console.error("Error fetching events:", error.message);
+      } else {
+        const mapped = (data ?? []).map((post: any) => ({
+          id: post.id,
+          title: post.title,
+          events: post.events ?? null,
+        }));
+
+        setEvents(mapped);
+
+        // Extract event_date → JS Date objects for highlighting
+        const dates = mapped
+          .filter((p) => p.events?.event_date)
+          .map((p) => new Date(p.events!.event_date));
+        setHighlightDates(dates);
+      }
+    }
+
+    fetchEvents();
+  }, []);
+
+  function formatReadableDateTime(dateString: string, timeString?: string) {
+    try {
+      if (timeString) {
+        const dateTime = new Date(`${dateString}T${timeString}`);
+        return dateTime.toLocaleString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        });
+      }
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch {
+      return dateString;
+    }
+  }
+
 
   return (
     <div className="p-3">
@@ -25,12 +101,15 @@ export default function Events() {
           tileClassName={({ date, view }) => {
             const today = new Date();
 
-            // Event date highlight
+            // Highlight event dates
             if (
               view === "month" &&
-              date.getFullYear() === eventDate.getFullYear() &&
-              date.getMonth() === eventDate.getMonth() &&
-              date.getDate() === eventDate.getDate()
+              highlightDates.some(
+                (d) =>
+                  d.getFullYear() === date.getFullYear() &&
+                  d.getMonth() === date.getMonth() &&
+                  d.getDate() === date.getDate()
+              )
             ) {
               return "!bg-green-600 !text-white rounded-full";
             }
@@ -54,12 +133,29 @@ export default function Events() {
           <h2 className="text-lg font-semibold text-gray-900 mb-3">
             Upcoming
           </h2>
-          <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-            <h3 className="font-bold text-green-800 text-base">{event.title}</h3>
-            <p className="text-sm text-gray-700 mt-1">
-              {event.date} · {event.time} @ {event.venue}
-            </p>
-          </div>
+          {events.length > 0 ? (
+            events.map((event) =>
+              event.events ? (
+                <div
+                  key={event.id}
+                  className="p-4 mb-2 bg-green-50 rounded-lg border border-green-200"
+                >
+                  <h3 className="font-bold text-green-800 text-base">
+                    {event.title}
+                  </h3>
+                  <p className="text-sm text-gray-700 mt-1">
+                  {formatReadableDateTime(
+                    event.events.event_date,
+                    event.events.event_time
+                  )}{" "}
+                  @ {event.events.location}
+                </p>
+                </div>
+              ) : null
+            )
+          ) : (
+            <p className="text-sm text-gray-500">No upcoming events</p>
+          )}
         </div>
       </div>
     </div>

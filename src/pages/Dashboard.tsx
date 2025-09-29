@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from "react-router";
+import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { Menu } from "lucide-react";
 import { useState, useMemo } from "react";
@@ -51,7 +51,7 @@ export default function Dashboard() {
       {/* Overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 md:hidden"
+          className="fixed inset-0 bg-black/10 backdrop-blur-sm md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}

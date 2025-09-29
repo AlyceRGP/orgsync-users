@@ -1,4 +1,4 @@
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { 
   LayoutDashboard,
@@ -12,6 +12,7 @@ import {
 
 export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
   const { signOut } = useAuth();
+  const navigate = useNavigate();
   
   const links = [
     { to: ".", label: "Dashboard", icon: LayoutDashboard },
@@ -24,6 +25,7 @@ export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
 
   const handleSignOut = async () => {
     await signOut();
+    navigate("/signin");
     if (onLinkClick) onLinkClick(); // close sidebar after signout
   };
 
