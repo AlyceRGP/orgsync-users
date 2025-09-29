@@ -42,3 +42,39 @@ export type OrganizationMember = {
   member?: Member;
   organization?: Organization;
 };
+
+
+export type Adviser = Member & {
+  org_id: string;
+  assigned_at: string;
+  organization?: Organization;
+};
+
+export interface Posts {
+  id: string;
+  user_id: string;
+  org_id: string | null;
+  title: string;
+  content: string;
+  tags: any[] | null;
+  status: string | null;
+  view_count: number | null;
+  is_pinned: boolean | null;
+  created_at: string;
+  updated_at: string | null;
+  type: 'announcement' | 'event' | 'poll' | 'form';
+
+  events?: {
+    event_type: string;
+    event_date: string;
+    event_time: string;
+    location: string;
+  } | null;
+}
+
+export interface Event {
+  event_type: string;
+  event_date: string;
+  event_time: string;
+  location: string;
+}

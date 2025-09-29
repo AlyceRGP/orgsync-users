@@ -3,7 +3,7 @@ import {
   createBrowserRouter,
   RouterProvider,
   Navigate
-} from "react-router";
+} from "react-router-dom";
 import PrivateRoute from "./components/PrivateRoute";
 import Dashboard from "./pages/Dashboard";
 
@@ -15,6 +15,7 @@ import Organizations from "./pages/dashboard/Organizations";
 import Profile from "./pages/dashboard/Profile";
 import Games from "./pages/dashboard/Games";
 import DashboardHome from "./pages/dashboard/DashboardHome";
+import UnityGame from "./pages/dashboard/UnityGame";
 
 const router = createBrowserRouter([
   { 
@@ -39,6 +40,7 @@ const router = createBrowserRouter([
       { path: "games", element: <Games /> },
     ],
   },
+  { path: "unity-game", element: <UnityGame /> },
 ]);
 
 export default function Root() {
